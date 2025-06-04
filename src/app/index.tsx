@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { setCustomText } from 'react-native-global-props';
 
 import Display from '../components/display';
 import Button from '../components/button';
@@ -9,12 +8,6 @@ import Button from '../components/button';
 // import { RxCross2 } from 'react-icons/rx';
 // import { FaCalculator, FaPlus } from 'react-icons/fa6';
 // import { FaMinus, FaBackspace } from 'react-icons/fa';
-
-setCustomText({
-  style: {
-    fontFamily: 'sans-serif',
-  },
-});
 
 export default function Index() {
   // const [operacao, setOperacao] = useState(0);
@@ -27,17 +20,27 @@ export default function Index() {
   });
 
   const addValue = (d: string | number) => {
-    if ((d == '+' || d == '-' || d == '/' || d == '*') && state.operado) {
-      setState({
-        ...state,
-        valorTela: state.resultado,
-        resultado: String(0),
-      });
+    let newState = { ...state };
+
+    if (d == '+' || d == '-' || d == '/' || d == '*') {
+      newState.ponto = false;
     }
-    setState({
-      ...state,
-      valorTela: state.valorTela + d,
-    });
+
+    if (
+      (d == '+' || d == '-' || d == '/' || d == '*') &&
+      state.operado == true
+    ) {
+      newState.valorTela = state.resultado;
+      newState.resultado = '';
+    }
+
+    if (d == '.') {
+      newState.ponto = true;
+    }
+
+    newState.valorTela = state.valorTela + d;
+
+    setState(newState);
   };
 
   const clearState = () => {
@@ -66,6 +69,7 @@ export default function Index() {
       setState({
         ...state,
         operado: true,
+        ponto: false,
         resultado: eval(state.valorTela),
       });
     } catch (err) {
@@ -78,23 +82,36 @@ export default function Index() {
     }
   };
 
+  const lastValue = state.valorTela[state.valorTela.length - 1];
+  const operator =
+    lastValue == '+' ||
+    lastValue == '-' ||
+    lastValue == '/' ||
+    lastValue == '*' ||
+    lastValue == null;
+
   return (
     <View style={styles.container}>
       <Text>Calculadora</Text>
       <Display valor={state.valorTela} result={state.resultado} />
       <View style={styles.botoes}>
-        <Button onPress={() => operate('AC')} clear label='AC'></Button>
         <Button
+          disabled={!state.valorTela}
+          onPress={() => operate('AC')}
+          clear
+          label='AC'
+        ></Button>
+        <Button
+          disabled={!state.valorTela}
           onPress={() => operate('BS')}
           clear
-          // label={<FaBackspace />}
           label={'bs'}
         ></Button>
-        <Button clear label='%'></Button>
+        <Button onPress={() => addValue('%')} clear label='%'></Button>
         <Button
           onPress={() => addValue('/')}
           operation
-          // label={<RiDivideFill />}
+          disabled={operator}
           label={'/'}
         ></Button>
         <Button onPress={() => addValue(7)} label='7'></Button>
@@ -103,7 +120,7 @@ export default function Index() {
         <Button
           onPress={() => addValue('*')}
           operation
-          // label={<RxCross2 fontSize={30} />}
+          disabled={operator}
           label={'X'}
         ></Button>
         <Button onPress={() => addValue(4)} label='4'></Button>
@@ -112,7 +129,7 @@ export default function Index() {
         <Button
           onPress={() => addValue('-')}
           operation
-          // label={<FaMinus fontSize={30} />}
+          disabled={operator}
           label={'-'}
         ></Button>
         <Button onPress={() => addValue(1)} label='1'></Button>
@@ -121,12 +138,16 @@ export default function Index() {
         <Button
           onPress={() => addValue('+')}
           operation
-          // label={<FaPlus fontSize={30} />}
+          disabled={operator}
           label={'+'}
         ></Button>
         <Button label={'c'}></Button>
-        <Button label='0'></Button>
-        <Button disabled={state.ponto} label='.'></Button>
+        <Button onPress={() => addValue(0)} label='0'></Button>
+        <Button
+          onPress={() => addValue('.')}
+          disabled={state.ponto}
+          label=','
+        ></Button>
         <Button onPress={() => operate('=')} operation label='='></Button>
       </View>
     </View>

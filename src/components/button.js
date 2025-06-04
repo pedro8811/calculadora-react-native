@@ -12,8 +12,11 @@ export default function Button(props) {
   if (props.clear) {
     buttonStyles.push(styles.clearBtn);
   }
+  if (props.disabled) {
+    buttonStyles.push(styles.disabled);
+  }
   return (
-    <TouchableHighlight onPress={props.onPress}>
+    <TouchableHighlight disabled={props.disabled} onPress={props.onPress}>
       <Text style={buttonStyles}>{props.label}</Text>
     </TouchableHighlight>
   );
@@ -27,8 +30,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     border: 'none',
     borderRadius: 60,
+    alignContent: 'center',
     textAlign: 'center',
-    alignContent: 'start',
     color: '#fff',
   },
   operationBtn: {
@@ -40,5 +43,9 @@ const styles = StyleSheet.create({
   },
   doubleBtn: {
     width: (Dimensions.get('window').width / 4) * 2,
+  },
+  disabled: {
+    backgroundColor: '#aaa',
+    color: '#ccc',
   },
 });
